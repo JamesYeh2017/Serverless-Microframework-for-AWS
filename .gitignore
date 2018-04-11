@@ -5,3 +5,4 @@ serverless_venv/
 helloworld/.DS_Store/
 helloworld/.aws/
 helloworld/__pycache__/
+helloworld/.chalice/deployed/dev.json
