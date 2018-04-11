@@ -1,0 +1,4 @@
+helloworld/.chalice/deployments/
+
+serverless_venv/
+.idea/
