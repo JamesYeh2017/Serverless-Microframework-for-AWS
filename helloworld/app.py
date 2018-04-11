@@ -1,10 +1,12 @@
-from chalice import Chalice, BadRequestError
+from chalice import Chalice, BadRequestError, NotFoundError
 
 app = Chalice(app_name='helloworld')
 app.debug = True
 CITIES_TO_STATE = {
     'seattle': 'WA',
     'portland': 'OR',
+}
+OBJECTS = {
 }
 
 
@@ -38,6 +40,24 @@ def create_user():
     return {'user': user_as_json}
 
 
+# echo '{"foo": "bar"}' | http PUT https://endpoint/api/objects/mykey
+# http GET https://endpoint/api/objects/mykey
+@app.route('/objects/{key}', methods=['GET', 'PUT'])
+def myobject(key):
+    request = app.current_request
+    if request.method == 'PUT':
+        OBJECTS[key] = request.json_body
+    elif request.method == 'GET':
+        try:
+            return {key: OBJECTS[key]}
+        except KeyError:
+            raise NotFoundError(key)
+
+
+# use current_request object and to_dict method, which returns all the information about the current request as a dictionary.
+@app.route('/introspect')
+def introspect():
+    return app.current_request.to_dict()
 
 
 
