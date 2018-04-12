@@ -25,24 +25,24 @@ def index_get():
                     headers={'Content-Type': 'text/plain'})
 
 
-# http https://endpoint/api/cities
-# http POST https://endpoint/api/cities foo = bar
+# http https://endpoint/api/city
+# http POST https://endpoint/api/city foo = bar
 @app.route('/cities', methods=['GET', 'POST'])
-def state_of_city():
+def state_of_city_list():
     request = app.current_request
     if request.method == 'GET':
         return {'CITIES_TO_STATE': CITIES_TO_STATE}
     elif request.method == 'POST':
         data_as_json = request.json_body
-        for cities in data_as_json:
-            CITIES_TO_STATE[cities] = data_as_json[cities]
+        for city in data_as_json:
+            CITIES_TO_STATE[city] = data_as_json[city]
         return {'CITIES_TO_STATE': CITIES_TO_STATE}
 
 
-# http PUT https://endpoint/api/cities/{city} foo = bar
-# http GET https://endpoint/api/cities/{city}
-@app.route('/cities/{city}', methods=['GET', 'PUT'])
-def myobject(city):
+# http PUT https://endpoint/api/city/{city} foo = bar
+# http GET https://endpoint/api/city/{city}
+@app.route('/city/{city}', methods=['GET', 'PUT'])
+def state_of_city_detail(city):
     request = app.current_request
     if request.method == 'PUT':
         CITIES_TO_STATE[city] = request.json_body[city]
@@ -66,17 +66,38 @@ def index_post():
     }
 
 
-@app.route('/objects/{key}', methods=['GET', 'PUT'])
-def s3objects(key):
+# http https://endpoint/api/city_s3
+# http POST https://endpoint/api/city_s3 foo = bar
+@app.route('/city_s3', methods=['GET', 'POST'])
+def state_of_city_list_s3():
+    request = app.current_request
+    if request.method == 'GET':
+        response = S3.get_object(Bucket=BUCKET)
+        return json.loads(response['Body'].read())
+    elif request.method == 'POST':
+        data_as_json = request.json_body
+        S3.put_object(Bucket=BUCKET, city=list(data_as_json.keys())[0],
+                      Body=json.dumps(request.json_body))
+        return data_as_json
+
+
+# http PUT https://endpoint/api/city_s3/{city} foo = bar
+# http GET https://endpoint/api/city_s3/{city}
+@app.route('/city_s3/{city}', methods=['GET', 'PUT'])
+def state_of_city_detail_s3(city):
     request = app.current_request
     if request.method == 'PUT':
-        S3.put_object(Bucket=BUCKET, Key=key,
-                      Body=json.dumps(request.json_body))
+        data_as_json = request.json_body
+        S3.put_object(Bucket=BUCKET, city=city,
+                      Body=json.dumps(data_as_json))
+        # response = S3.get_object(Bucket=BUCKET, city=city)
+        return data_as_json
     elif request.method == 'GET':
         try:
-            response = S3.get_object(Bucket=BUCKET, Key=key)
+            response = S3.get_object(Bucket=BUCKET, city=city)
             return json.loads(response['Body'].read())
-        except ClientError as e:
-            raise NotFoundError(key)
+        except ClientError:
+            raise BadRequestError("Unknown city '%s', valid choices are: %s" % (
+                                    city, ', '.join(CITIES_TO_STATE.keys())))
 
 
