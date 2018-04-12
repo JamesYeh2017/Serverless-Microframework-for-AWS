@@ -1,6 +1,9 @@
-from chalice import Chalice, BadRequestError, NotFoundError
+from chalice import Chalice, BadRequestError, NotFoundError, Response
 import sys
 from urllib.parse import urlparse, parse_qs
+import json
+import boto3
+from botocore.exceptions import ClientError
 
 app = Chalice(app_name='helloworld')
 app.debug = True
@@ -11,10 +14,15 @@ CITIES_TO_STATE = {
 OBJECTS = {
 }
 
+S3 = boto3.client('s3', region_name='us-west-2')
+BUCKET = 'hello_bucket'
+
 
 @app.route('/')
 def index_get():
-    return {'hello': 'world'}
+    return Response(body='hello world!',
+                    status_code=200,
+                    headers={'Content-Type': 'text/plain'})
 
 
 # http https://endpoint/api/cities
@@ -33,15 +41,15 @@ def state_of_city():
 
 # http PUT https://endpoint/api/cities/{city} foo = bar
 # http GET https://endpoint/api/cities/{city}
-@app.route('/objects/{key}', methods=['GET', 'PUT'])
+@app.route('/cities/{city}', methods=['GET', 'PUT'])
 def myobject(city):
     request = app.current_request
     if request.method == 'PUT':
         CITIES_TO_STATE[city] = request.json_body[city]
-        return {'state': CITIES_TO_STATE[city]}
+        return {city: CITIES_TO_STATE[city]}
     elif request.method == 'GET':
         try:
-            return {'state': CITIES_TO_STATE[city]}
+            return {city: CITIES_TO_STATE[city]}
         except KeyError:
             raise BadRequestError("Unknown city '%s', valid choices are: %s" % (
                 city, ', '.join(CITIES_TO_STATE.keys())))
@@ -49,6 +57,7 @@ def myobject(city):
 
 # The default behavior of a view function supports a request body of application/json.
 # Specifying the content_types parameter value to your app.route(). This parameter is a list of acceptable content types.
+# http --form POST https://endpoint/api/formtest states=WA states=CA --debug
 @app.route('/', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
 def index_post():
     parsed = parse_qs(app.current_request.raw_body.decode())
@@ -56,5 +65,18 @@ def index_post():
         'states': parsed.get('states', [])
     }
 
+
+@app.route('/objects/{key}', methods=['GET', 'PUT'])
+def s3objects(key):
+    request = app.current_request
+    if request.method == 'PUT':
+        S3.put_object(Bucket=BUCKET, Key=key,
+                      Body=json.dumps(request.json_body))
+    elif request.method == 'GET':
+        try:
+            response = S3.get_object(Bucket=BUCKET, Key=key)
+            return json.loads(response['Body'].read())
+        except ClientError as e:
+            raise NotFoundError(key)
 
 
