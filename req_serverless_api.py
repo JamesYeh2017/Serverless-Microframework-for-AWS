@@ -6,6 +6,7 @@ application/x-www-form-urlencoded Content-Type is use 'data' parameter value to 
 application/json Content-Type is use 'json' parameter value to requests()
 """
 
+
 def request_method(auth, url, payload, method="get"):
     req = ""
 
