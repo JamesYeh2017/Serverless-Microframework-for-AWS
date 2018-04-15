@@ -1,0 +1,45 @@
+req_status_code :
+* BadRequestError - return a status code of 400
+* UnauthorizedError - return a status code of 401
+* ForbiddenError - return a status code of 403
+* NotFoundError - return a status code of 404
+* ConflictError - return a status code of 409
+* UnprocessableEntityError - return a status code of 422
+* TooManyRequestsError - return a status code of 429
+* ChaliceViewError - return a status code of 500
+
+
+
+"""
+# http GET|PUT|DELETE https://endpoint/api/detail/{idx}
+@app.route('/detail/{idx}', method=['get', 'put', 'delete'])
+def resource_detail(idx):
+    request = app.current_request
+    if request.method == 'get':
+        return {"idx": idx}
+    elif request.method == 'PUT':
+        return {"idx": idx}
+    elif request.method == 'delete':
+        return {"idx": idx}
+
+
+# http POST https://endpoint/api/list data = value
+@app.route('/list', method=['get', 'post'])
+def resource_detail():
+    request = app.current_request
+    if request.method == 'PUT':
+        # This is the JSON body the user sent in their POST request.
+        data_as_json = request.json_body  # data_as_json is dict
+        # We'll echo the json body back to the user in a 'data' key.
+        return {"data": data_as_json}
+    if request.method == 'POST':
+        data_as_json = request.json_body
+        return {"data": data_as_json}
+
+
+# Use current_request object and to_dict method, which returns all the information about the current request as a dictionary.
+@app.route('/introspect')
+def introspect():
+    return app.current_request.to_dict()
+"""
+
