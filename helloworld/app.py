@@ -61,6 +61,17 @@ def state_of_city_detail(city):
             raise BadRequestError("Unknown city '%s', valid choices are: %s" % (city, ', '.join(CITIES_TO_STATE.keys())))
 
 
+# The default behavior of a view function supports a request body of application/json.
+# Specifying the content_types parameter value to your app.route(). This parameter is a list of acceptable content types.
+# http --form POST https://endpoint/api/formtest states=WA states=CA --debug
+@app.route('/', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
+def index_post():
+    parsed = parse_qs(app.current_request.raw_body.decode())
+    return {
+        'states': parsed.get('states', [])
+    }
+
+
 # http https://endpoint/api/city_s3
 # http POST https://endpoint/api/city_s3 foo = bar
 @app.route('/city_s3', methods=['GET', 'POST'])
