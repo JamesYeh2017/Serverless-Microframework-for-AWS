@@ -30,8 +30,8 @@ def request_method(auth, url, payload, method="get"):
 
 def main():
     auth = ""
-    url = "https://bph2va71cc.execute-api.ap-northeast-1.amazonaws.com/api/city_s3"  # city
-    payload = {"b": "A"}
+    url = "https://hv27valyi0.execute-api.ap-northeast-1.amazonaws.com/api/city_s3/b"  # city
+    payload = {"b": "B"}
     method = "get".lower()
     request_method(auth, url, payload, method)
 
