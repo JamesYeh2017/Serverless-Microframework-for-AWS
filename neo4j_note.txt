@@ -1,0 +1,6 @@
+
+cd /bin
+neo4j start
+./cypher-shell -u neo4j -p neo4j
+
+
