@@ -1,31 +1,35 @@
-## 使用Vagrant開啟CLI虛擬環境
+#### 搭配Vagrant開啟CLI虛擬環境實作Ansible設定
 傳統使用 VirtualBox 透過圖形使用者介面 (Graphical User Interface, GUI) 操作虛擬主機，
 Vagrant 主要是使用命令列介面 (command-line interface, CLI) 來與虛擬主機做溝通。
 Install Virtualbox, Install Vagrant
 # 初始化 Vagrant 虛擬機 :
-$vagrant init beto/ubuntu-14.04
+$ vagrant init beto/ubuntu-14.04
+$ vagrant init ubuntu/trusty64
 # 啟動 Vagrant 虛擬機 :
-$vagrant up
-# 關閉/重新開機/移除  虛擬機 :
-$vagrant halt  $ vagrant reload  $ vagrant destroy
+$ vagrant up
+# 關閉/重新開機/刪除/移除  虛擬機 :
+$ vagrant halt  $ vagrant reload  $ vagrant destroy  $ vagrant box remove {box name}
 # 查詢該虛擬機狀態 :
-$vagrant status
+$ vagrant status
 # 透過 SSH 來登入該虛擬機 :
-$vagrant ssh
+$ vagrant ssh
 
-## Ansible : Control Machine according to playbook to apply on Managed Node by ansible.
+### Ansible : Control Machine according to playbook to apply on Managed Node by ansible.
 ## Ansible → Vagrant
 inventory：主機列表、主機清冊。
-playbook：劇本。
+playbook.yml：劇本。
 如果操控對象是本地端的虛擬機，可設定 ANSIBLE_HOST_KEY_CHECKING=false
-ansible-playbook -i ~/Ansible_turtoal/inventory   --private-key=.vagrant/machines/default/virtualbox ~/Ansible_turtoal/playbook.yml
-                  inventory_path                                                   playbook_path
-## Vagrant → Ansible
+$ ansible-playbook -i ~/Ansible_turtoal/inventory   --private-key=.vagrant/machines/default/virtualbox ~/Ansible_turtoal/playbook.yml
+                        inventory_path                                                                          playbook_path
+
+## Vagrant → Ansible  vagrant自動產生inventory且動態讀取playbook.yml，讓Ansible可以確認主機列表。
+$ vi Vagrantfile
 config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
     #ansible.sudo = true
     #ansible.verbose = "vvv"
 end
+$ vagrant provision
 
 
-
+####
