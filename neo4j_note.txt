@@ -1,6 +1,7 @@
+Install : https://neo4j.com/docs/operations-manual/current/installation/linux/rpm/
+Command : http://blog.51cto.com/7946494/1871916
 
 cd /bin
 neo4j start
 ./cypher-shell -u neo4j -p neo4j
-
 
